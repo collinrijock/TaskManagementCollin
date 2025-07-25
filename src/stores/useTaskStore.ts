@@ -21,6 +21,7 @@ interface TaskState {
   ) => Promise<void>;
   deleteTask: (taskId: string) => Promise<void>;
   reorderTasks: (taskListId: string, orderedTaskIds: string[]) => Promise<void>;
+  setTaskLists: (taskLists: TaskList[]) => void;
   clearStore: () => void;
 }
 
@@ -130,6 +131,7 @@ export const useTaskStore = create<TaskState>()(
           throw err;
         }
       },
+      setTaskLists: (taskLists) => set({ taskLists }),
       clearStore: () =>
         set({ taskLists: [], tasks: [], error: null, loading: false }),
     }),

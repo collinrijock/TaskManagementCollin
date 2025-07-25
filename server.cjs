@@ -105,7 +105,7 @@ apiRouter.post('/signup', (req, res) => {
     writeDb(db);
 
     const { passwordHash: _, ...userToReturn } = newUser;
-    res.status(201).json(userToReturn);
+    res.status(201).json({ user: userToReturn, taskList: newTaskList });
   } catch (err) {
     console.error('Error during signup:', err);
     res.status(500).json({ message: 'Internal server error' });

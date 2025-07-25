@@ -3,26 +3,41 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import api from '../lib/api';
 import axios from 'axios';
+import { useAuthStore } from '../stores/useAuthStore';
+import { useTaskStore } from '../stores/useTaskStore';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const login = useAuthStore((state) => state.login);
+  const { setTaskLists, clearStore } = useTaskStore((state) => ({
+    setTaskLists: state.setTaskLists,
+    clearStore: state.clearStore,
+  }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     try {
-      await api.post('/signup', {
+      const response = await api.post('/signup', {
         email,
         password,
         createdAt: new Date().toISOString(),
       });
 
-      alert('Signup successful! Please log in.');
-      navigate('/login');
+      const { user, taskList } = response.data;
+
+      // Clear any data from a previous session before logging in
+      clearStore();
+
+      // Log the user in and set their initial task list
+      login(user);
+      setTaskLists([taskList]);
+
+      navigate('/dashboard');
     } catch (err) {
       if (axios.isAxiosError(err)) {
         if (err.response) {
