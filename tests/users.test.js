@@ -32,8 +32,8 @@ beforeEach(() => {
 });
 
 describe('User API', () => {
-  it('should allow a user to sign up', async () => {
-    console.log('Testing user signup: should create a new user successfully.');
+  it('should allow a user to sign up and create a default task list', async () => {
+    console.log('Testing user signup: should create a new user and a default task list successfully.');
     const res = await request(app)
       .post('/api/signup')
       .send({
@@ -44,6 +44,12 @@ describe('User API', () => {
     expect(res.body).toHaveProperty('id');
     expect(res.body.email).toBe('test@example.com');
     expect(res.body).not.toHaveProperty('passwordHash');
+    expect(res.body).toHaveProperty('defaultTaskListId');
+
+    const db = JSON.parse(fs.readFileSync(dbFilePath, 'utf-8'));
+    const taskList = db.taskLists.find(tl => tl.id === res.body.defaultTaskListId);
+    expect(taskList).toBeDefined();
+    expect(taskList.ownerId).toBe(res.body.id);
   });
 
   it('should not allow signup with an existing email', async () => {
@@ -79,8 +85,8 @@ describe('User API', () => {
         });
     });
 
-    it('should allow a registered user to log in', async () => {
-      console.log('Testing user login: should succeed with correct credentials.');
+    it('should allow a registered user to log in and return the default task list ID', async () => {
+      console.log('Testing user login: should succeed and return user data with default task list ID.');
       const res = await request(app)
         .post('/api/login')
         .send({
@@ -91,6 +97,7 @@ describe('User API', () => {
       expect(res.statusCode).toEqual(200);
       expect(res.body.email).toBe('test@example.com');
       expect(res.body).not.toHaveProperty('passwordHash');
+      expect(res.body).toHaveProperty('defaultTaskListId');
     });
 
     it('should not allow login with a wrong password', async () => {

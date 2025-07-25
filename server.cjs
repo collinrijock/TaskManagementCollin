@@ -81,22 +81,24 @@ apiRouter.post('/signup', (req, res) => {
     const salt = bcrypt.genSaltSync(10);
     const passwordHash = bcrypt.hashSync(password, salt);
     
+    const userId = crypto.randomUUID();
+    const taskListId = crypto.randomUUID();
+
     const newUser = {
-      id: crypto.randomUUID(),
+      id: userId,
       email,
       passwordHash,
       createdAt: createdAt || new Date().toISOString(),
+      defaultTaskListId: taskListId,
     };
 
     const newTaskList = {
-      id: crypto.randomUUID(),
+      id: taskListId,
       name: 'Tasks',
-      ownerId: newUser.id,
+      ownerId: userId,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-
-    newUser.defaultTaskListId = newTaskList.id;
 
     db.users.push(newUser);
     db.taskLists.push(newTaskList);
